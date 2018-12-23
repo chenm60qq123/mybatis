@@ -2,148 +2,222 @@
 <html>
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="renderer" content="webkit">
-    <meta http-equiv="Cache-Control" content="no-siteapp" />
-    <!-- <title>H+ 后台主题UI框架 - 主页</title> -->
-    <!--[if lt IE 8]>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <!-- <title>H+ 后台主题UI框架 - 主页</title> -->
+  <!--[if lt IE 8]>
     <meta http-equiv="refresh" content="0;ie.html" />
     <![endif]-->
-    <link href="../js/plugins/elementUi/index.css" rel="styleSheet">
-    
+  <link href="../js/plugins/elementUi/index.css" rel="styleSheet">
+
 </head>
 
 <body>
-    <div id="app">
-        <el-row :span="24">
-            <el-button type="primary" icon="el-icon-plus" @click="dialogFormVisible = true">新增</el-button>
-        </el-row >
-        <el-row :span="18" justify="center" style="margin-top: 10px;">
-            <el-table
-            :data="tableData"
-            style="width: 100%">
-            <el-table-column
-            type="index"
-            label="序号"
-            width="80"
-            :index="indexMethod">
-            </el-table-column>
-            <el-table-column
-              prop="id"
-              label="ID"
-              width="180"  v-if="false">
-            </el-table-column>
-            <el-table-column
-              prop="dataBaseName"
-              label="名称"
-              width="180">
-            </el-table-column>
-            <el-table-column
-              prop="driverName"
-              label="驱动名"
-              width="180">
-            </el-table-column>
-            <el-table-column
-              prop="address"
-              label="URL地址">
-            </el-table-column>
-            <el-table-column
-              prop="username"
-              label="用户名">
-            </el-table-column>
-            <el-table-column
-              prop="password"
-              label="密码">
-            </el-table-column>
-            <el-table-column
-                fixed="right"
-                label="操作"
-                width="200">
-                <template slot-scope="scope">
-                  <el-button type="primary" icon="el-icon-edit" circle></el-button>
-                  <el-button type="danger" icon="el-icon-delete" circle></el-button>
-                </template>
-              </el-table-column>
-        
-        </el-table>
-      </el-row>
-      <el-dialog title="数据库" :visible.sync="dialogFormVisible" width="40%">
-          <el-form :model="insertForm" :inline="true">
-            <el-form-item label="名称：" :label-width="formLabelWidth">
-              <el-input v-model="insertForm.name" autocomplete="off"></el-input>
-            </el-form-item>
-            <el-form-item label="驱动名：" :label-width="formLabelWidth">
-                <el-input v-model="insertForm.driverName" autocomplete="off"></el-input>
-            </el-form-item>
-            <el-form-item label="URL地址：" :label-width="formLabelWidth">
-                <el-input v-model="insertForm.url" autocomplete="off" width="100%"></el-input>
-            </el-form-item>
-            <el-form-item label="用户名：" :label-width="formLabelWidth">
-                <el-input v-model="insertForm.username" autocomplete="off"></el-input>
-            </el-form-item>
-            <el-form-item label="密码：" :label-width="formLabelWidth">
-                <el-input v-model="insertForm.password" autocomplete="off"></el-input>
-            </el-form-item>
-            
-          </el-form>
-          <div slot="footer" class="dialog-footer">
-              <el-button type="primary" @click="dialogFormVisible = false">提 交</el-button>
-              <el-button @click="dialogFormVisible = false">取 消</el-button>
-            </div>
-        </el-dialog>
-    </div>
+  <div id="app">
+    <el-row :span="24">
+      <el-button type="primary" icon="el-icon-plus" @click="action('add')">新增</el-button>
+      <el-button type="primary" icon="el-icon-plus" @click="action('deleteIn',multipleSelection)">删除</el-button>
+    </el-row>
+    <el-row :span="18" justify="center" style="margin-top: 10px;">
+      <el-table :data="tableData" style="width: 100%" @selection-change="handleSelectionChange">
+        <el-table-column type="selection" width="55">
+        </el-table-column>
+        <el-table-column type="index" label="序号" width="80" >
+        </el-table-column>
+        <el-table-column prop="id" label="ID" width="180" v-if="false">
+        </el-table-column>
+        <el-table-column prop="name" label="名称" width="180">
+        </el-table-column>
+        <el-table-column prop="drivername" label="驱动名" width="180">
+        </el-table-column>
+        <el-table-column prop="url" label="URL地址">
+        </el-table-column>
+        <el-table-column prop="username" label="用户名">
+        </el-table-column>
+        <el-table-column prop="password" label="密码">
+        </el-table-column>
+        <el-table-column fixed="right" label="操作" width="200">
+          <template slot-scope="scope">
+            <el-button type="primary" icon="el-icon-edit" circle @click="action('update',scope.row)"></el-button>
+            <el-button type="danger" icon="el-icon-delete" circle @click="action('delete',scope.row)"></el-button>
+          </template>
+        </el-table-column>
 
-    <script src="../js/vue.js"></script>
-    <script src="../js/plugins/elementUi/index.js"></script>
-    <script src="../js/jquery.min.js"></script>
-    <script>
-  
-    new Vue({
-        el: '#app',
-        data() {
-        return {
-              dialogFormVisible: false,
-              insertForm: {
-                name: '',
-                driverName: '',
-                url: '',
-                username: '',
-                password: '',
-              },
-            formLabelWidth: '100px',
-              tableData: [{
-                date: '2016-05-02',
-                name: '王小虎',
-                address: '上海市普陀区金沙江路 1518 弄'
-              }, {
-                date: '2016-05-04',
-                name: '王小虎',
-                address: '上海市普陀区金沙江路 1517 弄'
-              }, {
-                date: '2016-05-01',
-                name: '王小虎',
-                address: '上海市普陀区金沙江路 1519 弄'
-              }, {
-                date: '2016-05-03',
-                name: '王小虎',
-                address: '上海市普陀区金沙江路 1516 弄'
-              }]
-            }
-        },
-        mounted(){
-          this.init();
-        },
-        methods:{
-          init(){
-              this.freachData();
-          },
-          freachData(){
-          }
-        }
-      })
-    </script> 
+      </el-table>
+      <div style="text-align:center;margin-top: 10px">
+        <el-pagination
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page="currentPage"
+          :page-sizes="[20,50,100, 200, 300, 400]"
+          :page-size=pageSize
+          layout="total, sizes, prev, pager, next, jumper"
+          :total=total>
+        </el-pagination>
+      </div>
     
+    </el-row>
+    <el-dialog title="数据库" :visible.sync="dialogFormVisible" width="40%">
+      <el-form :model="insertForm" :inline="true" >
+        <el-form-item label="名称：" :label-width="formLabelWidth" prop="name" >
+          <el-input v-model="insertForm.name" autocomplete="off"  ></el-input>
+        </el-form-item>
+        <el-form-item label="驱动名：" :label-width="formLabelWidth" prop="drivername" >
+          <el-input v-model="insertForm.drivername" autocomplete="off"   ></el-input>
+        </el-form-item>
+        <el-form-item label="URL地址：" :label-width="formLabelWidth" prop="url">
+          <el-input v-model="insertForm.url" autocomplete="off" width="100%"></el-input>
+        </el-form-item>
+        <el-form-item label="用户名：" :label-width="formLabelWidth" prop="username">
+          <el-input v-model="insertForm.username" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="密码：" :label-width="formLabelWidth" prop="password">
+          <el-input v-model="insertForm.password" autocomplete="off"></el-input>
+        </el-form-item>
+
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submit">提 交</el-button>
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+      </div>
+    </el-dialog>
+  </div>
+
+  <script src="../js/vue.js"></script>
+  <script src="../js/plugins/elementUi/index.js"></script>
+  <script src="../js/jquery.min.js"></script>
+  <script>
+    new Vue({
+      el: '#app',
+      data() {
+        return {
+          total:0,
+          currentPage: 1,
+          pageSize:20,
+          dialogFormVisible: false,
+          method: "",
+          formDemo: {
+            name: null,
+            drivername: null,
+            url: null,
+            username:null,
+            password: null,
+          },
+          insertForm: {},
+          formLabelWidth: '100px',
+          tableData: [],
+          multipleSelection: [],
+          rules: {
+            name: [{
+                required: true,
+                message: '请输入数据库名称',
+                trigger: 'blur'
+              }
+            ],
+            drivername: [{
+              required: true,
+              message: '请选择驱动',
+              trigger: 'blur'
+            }],
+            url: [{
+              required: true,
+              message: '请输入数据库连接地址',
+              trigger: 'blur'
+            }],
+            username: [{
+              required: true,
+              message: '请输入用户名',
+              trigger: 'blur'
+            }],
+            password:[{
+              required:true,
+              message:"请输入密码",
+              trigger:'blur'
+            }]
+           
+          }
+
+        }
+      },
+      mounted() {
+        this.init();
+      },
+      methods: {
+        init() {
+          this.freachData();
+        },
+        freachData() {
+          var that = this;
+          $.post("/database/selectByPage", {"pageSize":that.pageSize,"pageNum":that.currentPage},function (result) {
+            that.tableData = result.data.items;
+            that.total=result.data.totalNum;
+            that.currentPage=result.data.currentPage;
+          })
+        },
+        action(value, row) {
+          this.method = value;
+          if (value === "add") {
+            Object.assign(this.insertForm, this.formDemo);
+            this.dialogFormVisible = true;
+          } else if (value === "update") {
+            this.insertForm = row;
+            this.dialogFormVisible = true;
+          } else if (value.indexOf("delete") != -1) {
+            this.insertForm = row;
+            this.submit();
+          }
+
+        },
+        submit() {
+          var that = this;
+          that.dialogFormVisible = false;
+          $.ajax({
+            type: "post",
+            url: "/database/" + that.method,
+            data: JSON.stringify(that.insertForm),
+            contentType: 'application/json',
+            dataType: "json",
+            success: function (result) {
+              if (result && result.state === "200") {
+                that.$message({
+                  message: result.message,
+                  type: 'success'
+                });
+                that.freachData();
+              } else if (result.state === "500") {
+                that.$message({
+                  message: result.message,
+                  type: 'error'
+                });
+              }
+              
+            },
+            error:function(result){
+              that.$message({
+                  message: "出现错误！",
+                  type: 'error'
+              });
+            }
+          });
+        },
+        handleSelectionChange(val) {
+          this.multipleSelection = val;
+        },
+        handleSizeChange(val) {
+          this.pageSize=val;
+          this.freachData();
+        },
+        handleCurrentChange(val) {
+          this.currentPage=val;
+          this.freachData();
+        }
+
+      }
+    })
+  </script>
+
 </body>
 
 </html>
