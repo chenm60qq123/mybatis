@@ -18,13 +18,17 @@
   <div id="app">
     <el-row :span="24">
       <el-button type="primary" icon="el-icon-plus" @click="action('add')">新增</el-button>
-      <el-button type="primary" icon="el-icon-plus" @click="action('deleteIn',multipleSelection)">删除</el-button>
+      <el-button type="danger" icon="el-icon-delete" @click="action('deleteIn',multipleSelection)">删除</el-button>
+      <el-button type="success" icon="el-icon-refresh" @click="freachData('refresh')">刷新</el-button>
     </el-row>
     <el-row :span="18" justify="center" style="margin-top: 10px;">
-      <el-table :data="tableData" style="width: 100%" @selection-change="handleSelectionChange">
+      <el-table :data="tableData" style="width: 100%" @selection-change="handleSelectionChange" v-loading="loading"
+      element-loading-text="拼命加载中"
+      element-loading-spinner="el-icon-loading"
+      >
         <el-table-column type="selection" width="55">
         </el-table-column>
-        <el-table-column type="index" label="序号" width="80" >
+        <el-table-column type="index" label="序号" width="80">
         </el-table-column>
         <el-table-column prop="id" label="ID" width="180" v-if="false">
         </el-table-column>
@@ -47,25 +51,20 @@
 
       </el-table>
       <div style="text-align:center;margin-top: 10px">
-        <el-pagination
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-          :current-page="currentPage"
-          :page-sizes="[20,50,100, 200, 300, 400]"
-          :page-size=pageSize
-          layout="total, sizes, prev, pager, next, jumper"
+        <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage"
+          :page-sizes="[20,50,100, 200, 300, 400]" :page-size=pageSize layout="total, sizes, prev, pager, next, jumper"
           :total=total>
         </el-pagination>
       </div>
-    
+
     </el-row>
     <el-dialog title="数据库" :visible.sync="dialogFormVisible" width="40%">
-      <el-form :model="insertForm" :inline="true" >
-        <el-form-item label="名称：" :label-width="formLabelWidth" prop="name" >
-          <el-input v-model="insertForm.name" autocomplete="off"  ></el-input>
+      <el-form :model="insertForm" :inline="true" :rules="rules" ref="insertForm">
+        <el-form-item label="名称：" :label-width="formLabelWidth" prop="name">
+          <el-input v-model="insertForm.name" ></el-input>
         </el-form-item>
-        <el-form-item label="驱动名：" :label-width="formLabelWidth" prop="drivername" >
-          <el-input v-model="insertForm.drivername" autocomplete="off"   ></el-input>
+        <el-form-item label="驱动名：" :label-width="formLabelWidth" prop="drivername">
+          <el-input v-model="insertForm.drivername" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="URL地址：" :label-width="formLabelWidth" prop="url">
           <el-input v-model="insertForm.url" autocomplete="off" width="100%"></el-input>
@@ -79,7 +78,7 @@
 
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submit">提 交</el-button>
+        <el-button type="primary" @click="validateAction('insertForm')">提 交</el-button>
         <el-button @click="dialogFormVisible = false">取 消</el-button>
       </div>
     </el-dialog>
@@ -93,29 +92,35 @@
       el: '#app',
       data() {
         return {
-          total:0,
+          loading:false,
+          total: 0,
           currentPage: 1,
-          pageSize:20,
+          pageSize: 20,
           dialogFormVisible: false,
           method: "",
           formDemo: {
             name: null,
             drivername: null,
             url: null,
-            username:null,
+            username: null,
             password: null,
           },
-          insertForm: {},
+          insertForm: {
+            name: null,
+            drivername: null,
+            url: null,
+            username: null,
+            password: null,
+          },
           formLabelWidth: '100px',
           tableData: [],
           multipleSelection: [],
           rules: {
             name: [{
-                required: true,
-                message: '请输入数据库名称',
-                trigger: 'blur'
-              }
-            ],
+              required: true,
+              message: '请输入数据库名称',
+              trigger: 'blur'
+            }],
             drivername: [{
               required: true,
               message: '请选择驱动',
@@ -131,12 +136,12 @@
               message: '请输入用户名',
               trigger: 'blur'
             }],
-            password:[{
-              required:true,
-              message:"请输入密码",
-              trigger:'blur'
+            password: [{
+              required: true,
+              message: "请输入密码",
+              trigger: 'blur'
             }]
-           
+
           }
 
         }
@@ -148,12 +153,24 @@
         init() {
           this.freachData();
         },
-        freachData() {
+        freachData(value) {
           var that = this;
-          $.post("/database/selectByPage", {"pageSize":that.pageSize,"pageNum":that.currentPage},function (result) {
+          that.loading=true;
+          $.post("/database/selectByPage", {
+            "pageSize": that.pageSize,
+            "pageNum": that.currentPage
+          }, function (result) {
             that.tableData = result.data.items;
-            that.total=result.data.totalNum;
-            that.currentPage=result.data.currentPage;
+            that.total = result.data.totalNum;
+            that.currentPage = result.data.currentPage;
+            that.loading=false;
+            if(value==='refresh'){
+              that.$message({
+                      message: "数据刷新成功！",
+                      type: 'success'
+            });
+            }
+            
           })
         },
         action(value, row) {
@@ -170,47 +187,61 @@
           }
 
         },
-        submit() {
-          var that = this;
-          that.dialogFormVisible = false;
-          $.ajax({
-            type: "post",
-            url: "/database/" + that.method,
-            data: JSON.stringify(that.insertForm),
-            contentType: 'application/json',
-            dataType: "json",
-            success: function (result) {
-              if (result && result.state === "200") {
-                that.$message({
-                  message: result.message,
-                  type: 'success'
-                });
-                that.freachData();
-              } else if (result.state === "500") {
-                that.$message({
-                  message: result.message,
-                  type: 'error'
-                });
-              }
-              
-            },
-            error:function(result){
+        validateAction(from){
+          var that=this;
+          this.$refs[from].validate((valid) => {
+            if (!valid) {
               that.$message({
-                  message: "出现错误！",
-                  type: 'error'
+                    message: "数据错误！",
+                    type: 'error'
               });
+            }else{
+              that.submit();
             }
+          })
+        },
+        submit(from){
+          var that = this;
+          $.ajax({
+                type: "post",
+                url: "/database/" + that.method,
+                data: JSON.stringify(that.insertForm),
+                contentType: 'application/json',
+                dataType: "json",
+                success: function (result) {
+                  if (result && result.state === "200") {
+                    that.$message({
+                      message: result.message,
+                      type: 'success'
+                    });
+                    that.dialogFormVisible = false;
+                    that.freachData();
+                  } else if (result.state === "500") {
+                    that.$message({
+                      message: result.message,
+                      type: 'error'
+                    });
+                  }
+
+                },
+                error: function (result) {
+                  that.$message({
+                    message: "出现错误！",
+                    type: 'error'
+                  });
+                }
+
           });
         },
         handleSelectionChange(val) {
           this.multipleSelection = val;
         },
         handleSizeChange(val) {
-          this.pageSize=val;
+          this.pageSize = val;
           this.freachData();
         },
         handleCurrentChange(val) {
-          this.currentPage=val;
+          this.currentPage = val;
           this.freachData();
         }
 
