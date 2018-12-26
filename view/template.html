@@ -66,11 +66,17 @@
               default-expand-all
               :expand-on-click-node="false">
               <span class="custom-tree-node" slot-scope="{ node, data }" >
-                <span :id="nodeid" v-if='nodeid!=node.id'>{{nodeid}}</span>
-                <span v-if='nodeid==node.id'><input type='text' style="width: 80px"><span class='el-icon-document' click='update(1)'></span></span>
-                <span v-if='nodeid!=node.id' class="el-icon-news" @click="" style="margin-left: 20px;display: inline-block"></span>
-                <span v-if='nodeid!=node.id' class="el-icon-document" @click="addInput(node.id,data)"></span>
-                <span v-if='nodeid!=node.id' class="el-icon-delete" @click=""></span>
+                <span  v-if='nodeid!=node.id'>
+                    <span :id="nodeid" v-if='nodeid!=node.id'>{{nodeid}}</span>
+                    <span class="el-icon-news" @click="" style="margin-left: 20px;display: inline-block"></span>
+                    <span class="el-icon-document" @click="addInput(node.id,data)"></span>
+                    <span class="el-icon-delete" @click='inputValue=""'></span>
+                </span>
+                <span v-if='nodeid==node.id'>
+                  <input type='text' style="width: 80px" v-model="inputValue" >
+                  <span class='el-icon-check' @click='update(1)'></span>
+                  <span class='el-icon-close' @click='inputValue=""'></span>
+                </span>
               </span>
             </el-tree>
         </el-col>
@@ -149,6 +155,7 @@
         }]
       }];
         return {
+          inputValue:'1',
           nodeid:'3',
           data4: JSON.parse(JSON.stringify(data)),
           loading:false,
