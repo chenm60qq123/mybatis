@@ -71,6 +71,7 @@
               @node-contextmenu="treeMenuShow"
               :expand-on-click-node="false">
               <span class="custom-tree-node" slot-scope="{ node, data }" >
+<<<<<<< HEAD
                 
                 <span :id="dataid" v-if='dataid!=data.id'><i :class="data.type=='folder'?
                   'el-icon-message':'el-icon-document'"></i><span style="margin:10px;">{{data.label}}</span></span>
@@ -81,6 +82,19 @@
                 <!-- <span v-if='nodeid!=node.id' class="el-icon-news" @click="" style="margin-left: 20px;display: inline-block"></span>
                 <span v-if='nodeid!=node.id' class="el-icon-document" @click="addInput(node.id,data)"></span>
                 <span v-if='nodeid!=node.id' class="el-icon-delete" @click=""></span> -->
+=======
+                <span  v-if='nodeid!=node.id'>
+                    <span :id="nodeid" v-if='nodeid!=node.id'>{{nodeid}}</span>
+                    <span class="el-icon-news" @click="" style="margin-left: 20px;display: inline-block"></span>
+                    <span class="el-icon-document" @click="addInput(node.id,data)"></span>
+                    <span class="el-icon-delete" @click='inputValue=""'></span>
+                </span>
+                <span v-if='nodeid==node.id'>
+                  <input type='text' style="width: 80px" v-model="inputValue" >
+                  <span class='el-icon-check' @click='update(1)'></span>
+                  <span class='el-icon-close' @click='inputValue=""'></span>
+                </span>
+>>>>>>> e567cfdadf8c130070c4724f329fa40bf0791382
               </span>
             </el-tree>
         </el-col>
@@ -167,6 +181,7 @@
         }]
       }];
         return {
+<<<<<<< HEAD
           method:"",
           treeMenuStyle:{
             "top": "200px",
@@ -175,7 +190,10 @@
           treeMenuDisplay:false,
           selectNode:{},
           dataid:'',
+=======
+          inputValue:'1',
           nodeid:'3',
+>>>>>>> e567cfdadf8c130070c4724f329fa40bf0791382
           data4: JSON.parse(JSON.stringify(data)),
           loading:false,
           total: 0,
