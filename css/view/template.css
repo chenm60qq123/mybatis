@@ -1,0 +1,32 @@
+.tree-menu{
+    position: absolute;
+    z-index: 2002;
+    background-color: aliceblue;
+}
+ul{
+    list-style: none;
+    padding-inline-start: 0px;
+    margin: 0px;
+}
+.tree-menu-item:hover{
+    background-color: rgb(221, 212, 86);
+    /* border: 1px cyan solid; */
+}
+.tree-menu-item{
+    /* border: 1px solid aliceblue; */
+    cursor: pointer;
+    padding: 5px;
+    font-size: 12px;
+    margin: 5px;
+    /* width: 50px; */
+    /* display: flex; */
+    /* flex-direction: row; */
+    /* justify-content: space-between; */
+}
+.edit-item-btn{
+    zoom: 1.3;
+    margin: 2px;
+}
+.edit-item-btn:hover{
+    background-color: rgb(197, 212, 139);
+}
