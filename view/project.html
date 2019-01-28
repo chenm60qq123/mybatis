@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <!-- <title>H+ 后台主题UI框架 - 主页</title> -->
+  <!--[if lt IE 8]>
+    <meta http-equiv="refresh" content="0;ie.html" />
+    <![endif]-->
+  <link href="../js/plugins/elementUi/index.css" rel="styleSheet">
+  <link href="../css/view/template.css" rel="styleSheet">
+</head>
+
+<body>
+  <div id="app">
+    <el-row >
+        <el-row>
+          <el-button type="primary" icon="el-icon-plus" @click="action('add')">新增</el-button>
+          <el-button type="danger" icon="el-icon-delete" @click="action('deleteIn',multipleSelection)">删除</el-button>
+          <el-button type="success" icon="el-icon-refresh" @click="freachData('refresh')">刷新</el-button>
+        </el-row>
+        <el-row justify="center" style="margin-top: 10px;">
+          <el-table :data="tableData" style="width: 100%" @selection-change="handleSelectionChange" v-loading="loading"
+          element-loading-text="拼命加载中"
+          element-loading-spinner="el-icon-loading"
+          >
+            <el-table-column type="selection" width="55">
+            </el-table-column>
+            <el-table-column type="index" label="序号" width="80">
+            </el-table-column>
+            <el-table-column prop="id" label="项目编号" width="180" v-if="false">
+            </el-table-column>
+            <el-table-column prop="project_name" label="项目名称" width="200" >
+            </el-table-column>
+            <el-table-column prop="database_name" label="数据库名称" width="200" >
+            </el-table-column>
+            <el-table-column prop="template_name" label="模板名称" width="200" >
+            </el-table-column>
+            <el-table-column
+            fixed="right"
+            label="表配置"
+            width="120">
+            <template slot-scope="scope">
+              <span v-for="(item,index) in scope.row.tables" :key="index">{{index===0?'':','}}{{item.table_name}}</div>
+            </template>
+          </el-table-column>
+            <el-table-column prop="project_describe" label="项目描述" >
+            </el-table-column>
+            <!-- <el-table-column prop="list_id" label="模板目录" width="180" v-if="true">
+                <template slot-scope="scope">
+                    <el-button type="primary" icon="el-icon-edit" circle @click="templateEdit(scope.row.list_id)"></el-button>
+                  </template>
+            </el-table-column> -->
+            <el-table-column fixed="right" label="选择表" width="200">
+              <template slot-scope="scope">
+                <el-button type="primary" icon="el-icon-edit" circle @click="dialogTableSelect=true"></el-button>
+              </template>
+            </el-table-column>
+            <el-table-column fixed="right" label="操作" width="200">
+              <template slot-scope="scope">
+                <el-button type="primary" icon="el-icon-edit" circle @click="action('update',scope.row)"></el-button>
+                <el-button type="danger" icon="el-icon-delete" circle @click="action('delete',scope.row)"></el-button>
+              </template>
+            </el-table-column>
+
+          </el-table>
+          <div style="text-align:center;margin-top: 10px">
+            <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage"
+              :page-sizes="[20,50,100, 200, 300, 400]" :page-size=pageSize layout="total, sizes, prev, pager, next, jumper"
+              :total=total>
+            </el-pagination>
+          </div>
+      </el-row>
+    </el-row>
+    <el-dialog title="数据库" :visible.sync="dialogFormVisible" width="30%">
+      <el-form :model="insertForm" :inline="false" :rules="rules" ref="insertForm">
+        <el-form-item label="项目名称" :label-width="formLabelWidth" prop="project_name">
+          <el-input v-model="insertForm.project_name" ></el-input>
+        </el-form-item>
+        <el-form-item label="数据库链接"  :label-width="formLabelWidth" prop="database_id">
+          <el-select v-model="insertForm.database_id" placeholder="请选择数据库链接">
+            <el-option v-for="(database,index) in databaseList"  :key="index" :label="database.database_name" :value="database.database_id"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="模板目录"  :label-width="formLabelWidth" prop="template_id">
+          <el-select v-model="insertForm.template_id" placeholder="请选择模板">
+            <el-option v-for="(template,index) in templateList"  :key="index" :label="template.template_name" :value="template.template_id"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="项目描述" :label-width="formLabelWidth" prop="project_describe">
+          <el-input v-model="insertForm.project_describe" autocomplete="off" type="textarea"
+          :rows="6"></el-input>
+        </el-form-item>
+
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="validateAction('insertForm')">提 交</el-button>
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+      </div>
+    </el-dialog>
+    <el-dialog title="表配置" :visible.sync="dialogTableSelect" width="50%">
+      <el-row >
+      <el-col :span=8 style="max-height: 520px;min-height: 520px;overflow-y: auto">
+          <el-tree 
+          :props="props1"
+          :load="loadNode1"
+          ref="tree"
+          node-key="id"
+          :default-checked-keys="checked"
+          :default-expanded-keys="expanded"
+          lazy
+          show-checkbox
+          >
+        </el-tree>
+        </el-col>
+      </el-row>
+    </el-dialog>
+  </div>
+
+  <script src="../js/vue.js"></script>
+  <script src="../js/plugins/elementUi/index.js"></script>
+  <script src="../js/jquery.min.js"></script>
+  <script>
+    function update(value){
+      console.log(value);
+    }
+
+    new Vue({
+      el: '#app',
+      data() {
+        return {
+          i:0,
+          expanded:[],
+          checked:[],
+          props1: {
+          label: 'name',
+          children: 'zones',
+          isLeaf: 'leaf'
+          },
+          templateList:[{
+            template_name:"基础模板",
+            template_id:"123"
+          },{
+            template_name:"基础模板1",
+            template_id:"1233"
+          }],
+          databaseList:[{
+            database_name:"达梦6",
+            database_id:"123"
+          },{
+            database_name:"达梦7",
+            database_id:"1233"
+          }],
+          loading:false,
+          total: 0,
+          currentPage: 1,
+          pageSize: 20,
+          dialogTableSelect:false,
+          dialogFlieFormVisible:false,
+          dialogFormVisible: false,
+          method: "",
+          formDemo: {
+            project_name: "",
+            project_describe: "",
+            database_id: "",
+            template_id: "",
+          },
+          insertForm: {
+            project_name: "",
+            project_describe: "",
+            database_id: "",
+            template_id: "",
+          },
+          formLabelWidth: '100px',
+          tableData: [],
+          rules: {
+            template_name: [{
+              required: true,
+              message: '模板名称',
+              trigger: 'blur'
+            }],
+
+          }
+        }
+      },
+      mounted() {
+        this.init();
+      },
+      methods: {
+
+        init() {
+          this.freachData();
+        },
+        freachData(value) {
+          var that = this;
+          that.loading=true;
+          $.post("/mybatis-generator-plug/project/selectByPage", {
+            "pageSize": that.pageSize,
+            "pageNum": that.currentPage
+          }, function (result) {
+            that.tableData = result.data.items;
+            that.total = result.data.totalPage;
+            that.currentPage = result.data.currentPage;
+            that.loading=false;
+            if(value==='refresh'){
+              that.$message({
+                      message: "数据刷新成功！",
+                      type: 'success'
+            });
+            }
+            
+          })
+        },
+        action(value, row) {
+          this.method = value;
+          if (value === "add") {
+            Object.assign(this.insertForm, this.formDemo);
+            this.dialogFormVisible = true;
+          } else if (value === "update") {
+            Object.assign(this.insertForm, row);
+            this.dialogFormVisible = true;
+          } else if (value.indexOf("delete") != -1) {
+            this.insertForm = row;
+            this.submit();
+          }
+        },
+        validateAction(from){
+          var that=this;
+          this.$refs[from].validate((valid) => {
+            if (!valid) {
+              that.$message({
+                    message: "数据错误！",
+                    type: 'error'
+              });
+            }else{
+              that.submit();
+            }
+          })
+        },
+        submit(from){
+          var that = this;
+          $.ajax({
+                type: "post",
+                url: "/mybatis-generator-plug/project/" + that.method,
+                data: JSON.stringify(that.insertForm),
+                contentType: 'application/json',
+                dataType: "json",
+                success: function (result) {
+                  if (result && result.state === "200") {
+                    that.$message({
+                      message: result.message,
+                      type: 'success'
+                    });
+                    that.dialogFormVisible = false;
+                    that.freachData();
+                  } else if (result.state === "500") {
+                    that.$message({
+                      message: result.message,
+                      type: 'error'
+                    });
+                  }
+
+                },
+                error: function (result) {
+                  that.$message({
+                    message: "出现错误！",
+                    type: 'error'
+                  });
+                }
+
+          });
+        },
+        handleSelectionChange(val) {
+          this.multipleSelection = val;
+        },
+        handleSizeChange(val) {
+          this.pageSize = val;
+          this.freachData();
+        },
+        handleCurrentChange(val) {
+          this.currentPage = val;
+          this.freachData();
+        },
+        
+        getTemplateData(){
+
+        },
+        loadNode1(node, resolve) {
+          let that=this;
+          console.log(node);
+        if (node.level === 0) {
+          return resolve([{id:1, name: 'region' }]);
+         
+        }
+        if (node.level === 1){
+          $.post("/mybatis-generator-plug/table/getSchemaTable",function(result){
+            resolve(result.data);
+          })
+        }
+        if (node.level === 2){
+          $.post("/mybatis-generator-plug/table/getTables",{schemaId:node.data.id},function(result){
+            resolve(result.data);
+          })
+        }
+        
+      },
+      
+      },
+      
+    })
+  </script>
+
+</body>
+
+</html>

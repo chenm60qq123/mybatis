@@ -179,7 +179,7 @@
             Object.assign(this.insertForm, this.formDemo);
             this.dialogFormVisible = true;
           } else if (value === "update") {
-            this.insertForm = row;
+            Object.assign(this.insertForm, row);
             this.dialogFormVisible = true;
           } else if (value.indexOf("delete") != -1) {
             this.insertForm = row;
